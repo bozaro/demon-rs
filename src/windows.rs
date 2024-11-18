@@ -25,7 +25,7 @@ struct DaemonHolder {
 
 struct DaemonStatic {
     name: String,
-    holder: Box<DaemonFunc>,
+    holder: Box<dyn DaemonFunc>,
     handle: SERVICE_STATUS_HANDLE,
 }
 
