@@ -10,7 +10,7 @@ declare_singleton!(
     singleton,
     DaemonHolder,
     DaemonHolder {
-        holder: 0 as *mut DaemonStatic
+        holder: std::ptr::null_mut::<DaemonStatic>()
     }
 );
 
@@ -110,24 +110,6 @@ fn daemon_console(daemon: &mut DaemonStatic) -> Result<(), Error> {
     daemon.holder.exec()
 }
 
-unsafe extern "system" fn signal_handler(_sig: libc::c_int) {
-    daemon_wrapper(|daemon_static: &mut DaemonHolder| {
-        let daemon = &mut *daemon_static.holder;
-        match daemon.holder.take_tx() {
-            Some(ref tx) => {
-                let _ = tx.send(State::Stop);
-            }
-            None => (),
-        };
-    });
-}
-
 fn daemon_null() -> *mut DaemonStatic {
-    0 as *mut DaemonStatic
-}
-
-extern "C" {
-    fn raise(sig: libc::c_int) -> libc::c_int;
-    fn signal(sig: libc::c_int, handler: *const libc::c_void) -> libc::c_int;
-    fn kill(pid: libc::pid_t, sig: libc::c_int) -> libc::c_int;
+    std::ptr::null_mut::<DaemonStatic>()
 }

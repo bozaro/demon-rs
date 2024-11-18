@@ -35,7 +35,7 @@ macro_rules! declare_singleton {
         fn $name() -> $crate::singleton::SingletonHolder<$t> {
             static mut SINGLETON: *const $crate::singleton::SingletonHolder<$t> =
                 0 as *const $crate::singleton::SingletonHolder<$t>;
-            static ONCE: ::std::sync::Once = ::std::sync::ONCE_INIT;
+            static ONCE: ::std::sync::Once = ::std::sync::Once::new();
 
             unsafe {
                 ONCE.call_once(|| {
