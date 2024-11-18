@@ -19,7 +19,7 @@ struct DaemonHolder {
 }
 
 struct DaemonStatic {
-    holder: Box<DaemonFunc>,
+    holder: Box<dyn DaemonFunc>,
 }
 
 trait DaemonFunc {
@@ -83,9 +83,9 @@ impl DaemonRunner for Daemon {
                 func: Some((func, rx)),
             }),
         };
-        try!(guard_compare_and_swap(daemon_null(), &mut daemon));
+        guard_compare_and_swap(daemon_null(), &mut daemon)?;
         let result = daemon_console(&mut daemon);
-        try!(guard_compare_and_swap(&mut daemon, daemon_null()));
+        guard_compare_and_swap(&mut daemon, daemon_null())?;
         result
     }
 }
@@ -107,25 +107,13 @@ fn guard_compare_and_swap(
 }
 
 fn daemon_console(daemon: &mut DaemonStatic) -> Result<(), Error> {
-    let result;
-    unsafe {
-        //if SetConsoleCtrlHandler(Some(console_handler), TRUE) == FALSE
-        //{
-        //	return Err(format! ("Failed SetConsoleCtrlHandler: {}", error_string(GetLastError() as i32)));
-        //}
-        result = daemon.holder.exec();
-        //if SetConsoleCtrlHandler(Some(console_handler), FALSE) == FALSE
-        //{
-        //	return Err(format! ("Failed SetConsoleCtrlHandler: {}", error_string(GetLastError() as i32)));
-        //}
-    }
-    result
+    daemon.holder.exec()
 }
 
-unsafe extern "system" fn signal_handler(sig: libc::c_int) {
+unsafe extern "system" fn signal_handler(_sig: libc::c_int) {
     daemon_wrapper(|daemon_static: &mut DaemonHolder| {
         let daemon = &mut *daemon_static.holder;
-        return match daemon.holder.take_tx() {
+        match daemon.holder.take_tx() {
             Some(ref tx) => {
                 let _ = tx.send(State::Stop);
             }

@@ -1,6 +1,7 @@
 [package]
 name = "daemon"
 license = "MIT"
+edition = "2021"
 version = "0.0.8"
 description = "Library for creating simple Linux demons and Windows services."
 authors = [ "Artem V. Navrotskiy <bozaro@users.noreply.github.com>" ]

@@ -37,11 +37,7 @@ fn log(message: &str) {
 fn log_safe(message: &str) -> Result<(), Error> {
     println!("{}", message);
     let path = env::current_exe()?.with_extension("log");
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .append(true)
-        .open(&path)?;
+    let mut file = OpenOptions::new().create(true).append(true).open(&path)?;
     file.write(message.as_bytes())?;
     file.write(b"\n")?;
     Ok(())
